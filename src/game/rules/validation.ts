@@ -1,3 +1,4 @@
+import { matchers } from './registry'
 import type {
   CoefficientConfig,
   DigitConstraintsParams,
@@ -359,11 +360,17 @@ export function validateRules(input: unknown): RuleDefinition[] {
     if (baseScore < 0) fail(`${path}.baseScore`, 'must be non-negative')
 
     const matcherKey = requireNonEmptyString(rule.matcherKey, `${path}.matcherKey`)
-    let params: PatternParams | DigitConstraintsParams
+    let params: unknown
     if (matcherKey === 'pattern-matcher') {
       params = validatePatternParams(rule.params, `${path}.params`)
     } else if (matcherKey === 'digit-constraints') {
       params = validateDigitConstraintsParams(rule.params, `${path}.params`)
+    } else if (matcherKey in matchers) {
+      if (rule.params === undefined) {
+        params = {}
+      } else {
+        params = requireRecord(rule.params, `${path}.params`)
+      }
     } else {
       fail(`${path}.matcherKey`, `unknown matcher key "${matcherKey}"`)
     }
