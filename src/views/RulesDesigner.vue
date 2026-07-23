@@ -196,7 +196,11 @@ function deleteRule(index: number) {
 const paramsJson = computed(() => {
   if (form.value.matcherKey === 'pattern-matcher') return buildPatternParams()
   if (form.value.matcherKey === 'digit-constraints') return buildDigitParams()
-  return '{}'
+  try {
+    return JSON.stringify(JSON.parse(form.value.params))
+  } catch {
+    return form.value.params.trim() || '{}'
+  }
 })
 
 /* ══════════════ Pattern-matcher editor ══════════════ */
@@ -557,6 +561,15 @@ function onMatcherKeyInput() {
         </div>
       </template>
 
+      <!-- ── generic params editor ── -->
+      <template v-if="form.matcherKey !== 'pattern-matcher' && form.matcherKey !== 'digit-constraints'">
+        <h3>Matcher Params</h3>
+        <label class="raw-params-label">
+          JSON
+          <textarea v-model="form.params" class="inp raw-params" spellcheck="false" placeholder="{}" />
+        </label>
+      </template>
+
       <!-- ── params preview ── -->
       <h3>params (JSON)</h3>
       <pre class="json">{{ paramsJson }}</pre>
@@ -726,6 +739,21 @@ td.actions {
   font-size: 13px;
   color: var(--text-dim);
   cursor: pointer;
+}
+
+.raw-params-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.raw-params {
+  width: 100%;
+  min-height: 96px;
+  padding: 10px;
+  resize: vertical;
+  line-height: 1.5;
 }
 
 .json {
