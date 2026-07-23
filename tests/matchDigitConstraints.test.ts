@@ -17,6 +17,11 @@ describe('matchDigitConstraints', () => {
     expect(matchDigitConstraints(grid, { forbiddenDigits: [0, 5] })).toBe(0)
   })
 
+  it('rejects empty grids', () => {
+    expect(matchDigitConstraints([], { forbiddenDigits: [0] })).toBe(0)
+    expect(matchDigitConstraints([[]], { forbiddenDigits: [0] })).toBe(0)
+  })
+
   it('combines required and forbidden constraints', () => {
     expect(
       matchDigitConstraints(grid, { requiredDigits: [2, 5], forbiddenDigits: [0, 9] }),
