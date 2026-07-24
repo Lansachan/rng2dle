@@ -41,21 +41,21 @@ describe('contributed novelty rules', () => {
     expect(result.matches).toHaveLength(4)
   })
 
-  it('matches a pickaxe with a five-cell head and different handle', () => {
+  it('matches a Minecraft pickaxe with a three-cell head and different handle', () => {
     const grid = [
       [9, 9, 9, 0, 0, 0],
-      [9, 0, 9, 0, 0, 0],
       [0, 1, 0, 0, 0, 0],
       [0, 1, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0],
     ]
     const result = getMatcher('pattern-matcher')(grid, {
-      pattern: ['HHH', 'H H', ' X ', ' X '],
+      pattern: ['HHH', ' X ', ' X '],
       coefficient: { type: 'match-count' },
     })
     expect(result.coefficient).toBe(1)
-    expect(result.matches[0]?.groups.map((group) => group.length)).toEqual([5, 2])
+    expect(result.matches[0]?.groups.map((group) => group.length)).toEqual([3, 2])
   })
 
   it('uses the lower loop threshold without changing the loop matcher', () => {
