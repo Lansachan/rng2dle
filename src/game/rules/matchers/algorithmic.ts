@@ -1075,6 +1075,29 @@ function componentHoleCount(grid: Grid, component: Cell[]): number {
   return holes
 }
 
+export const matchValueMask: RuleMatcher = (grid, rawParams) => {
+  const { pattern, values } = rawParams as {
+    pattern: string[]
+    values: Record<string, number[]>
+  }
+  if (pattern.length !== grid.length || pattern.some((row, index) => Array.from(row).length !== grid[index]?.length)) {
+    return fail()
+  }
+
+  const groups = new Map<string, number[]>()
+  for (let row = 0; row < grid.length; row++) {
+    for (let column = 0; column < grid[row]!.length; column++) {
+      const token = Array.from(pattern[row]!)[column]!
+      if (token === ' ') continue
+      const allowed = values[token]
+      if (!allowed?.includes(grid[row]![column]!)) return fail()
+      if (!groups.has(token)) groups.set(token, [])
+      groups.get(token)!.push(toIndex(grid, row, column))
+    }
+  }
+  return succeed(1, ...groups.values())
+}
+
 export const matchLoopCount: RuleMatcher = asResultMatcher((grid, rawParams) => {
   const { threshold = 36 } = (rawParams ?? {}) as { threshold?: number }
   const digitLoops: Record<number, number> = { 0: 1, 6: 1, 8: 2, 9: 1 }
@@ -1094,6 +1117,7 @@ export const algorithmicMatchers: Readonly<Record<string, RuleMatcher>> = {
   'narrow-field': matchNarrowField,
   'captured-stones': matchCapturedStones,
   'e-shape': matchEShape,
+  'value-mask': matchValueMask,
   'loop-count': matchLoopCount,
   'determinant-zero': matchDeterminantZero,
   'sequential-path': matchSequentialPath,
