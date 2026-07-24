@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { matchDigitConstraints } from '../src/game/rules/matchers/matchDigitConstraints'
+import { matchDigitConstraints as runMatchDigitConstraints } from '../src/game/rules/matchers/matchDigitConstraints'
+
+const matchDigitConstraints = (...args: Parameters<typeof runMatchDigitConstraints>) => runMatchDigitConstraints(...args).coefficient
 
 const grid = [
   [1, 2, 3],

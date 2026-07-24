@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ page.title | default: site.title }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="site-logo" href="{{ '/' | relative_url }}">RNG²DLE</a>
+      <nav class="site-nav">
+        <a href="{{ '/rules/README' | relative_url }}">设计</a>
+        <a href="{{ '/rules/json-schema' | relative_url }}">规范</a>
+        <a href="{{ '/rules/rule-implementations' | relative_url }}">规则</a>
+        <a href="{{ '/rules/match-result' | relative_url }}">结果</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {{ content }}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>RNG²DLE — 二维随机数字盘面规则系统</p>
+    </div>
+  </footer>
+</body>
+</html>

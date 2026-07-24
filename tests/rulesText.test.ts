@@ -36,13 +36,16 @@ const rules = loadTextRules()
 describe('rules.txt', () => {
   it('contains every collected rule except intentionally empty rows', () => {
     const ids = new Set(rules.map((rule) => rule.id))
-    expect(rules).toHaveLength(72)
-    expect(ids).toHaveLength(72)
+    expect(rules).toHaveLength(76)
+    expect(ids).toHaveLength(76)
     expect(ids.has('rule-0036')).toBe(false)
     expect(ids.has('rule-0072')).toBe(false)
     for (let number = 1; number <= 73; number++) {
       if (number === 36 || number === 72) continue
       expect(ids.has(`rule-${String(number).padStart(4, '0')}`)).toBe(true)
+    }
+    for (const id of ['rule-0075', 'rule-0076', 'rule-0077', 'rule-0078']) {
+      expect(ids.has(id)).toBe(true)
     }
   })
 

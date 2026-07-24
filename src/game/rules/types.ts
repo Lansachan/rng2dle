@@ -1,5 +1,17 @@
 export type Grid = number[][]
 
+export type CellIndex = number
+export type ActivationGroup = CellIndex[]
+
+export interface MatchEvidence {
+  groups: ActivationGroup[]
+}
+
+export interface RuleMatchResult {
+  coefficient: number
+  matches: MatchEvidence[]
+}
+
 export interface LocalizedText {
   zh: string
   en: string
@@ -15,7 +27,7 @@ export interface RuleDefinition {
   params?: unknown
 }
 
-export type RuleMatcher = (grid: Grid, params?: unknown) => number
+export type RuleMatcher = (grid: Grid, params?: unknown) => RuleMatchResult
 
 export type CoefficientConfig =
   | { type: 'constant'; value: number }
@@ -29,6 +41,7 @@ export interface PatternParams {
   pattern: string[]
   symbolValues?: Record<string, number[]>
   allowSameWith?: Record<string, string[]>
+  groupOrder?: string[]
   multiple?: boolean
   allowOverlap?: boolean
   coefficient?: CoefficientConfig

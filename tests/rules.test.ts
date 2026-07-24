@@ -19,9 +19,9 @@ describe('production rule fixtures', () => {
         expect(rule).toBeDefined()
         if (!rule) return
 
-        const coefficient = getMatcher(rule.matcherKey)(testCase.grid, rule.params)
-        expect(coefficient).toBe(testCase.expectedCoefficient)
-        expect(coefficient * rule.baseScore).toBe(testCase.expectedCoefficient * rule.baseScore)
+        const result = getMatcher(rule.matcherKey)(testCase.grid, rule.params)
+        expect(result.coefficient).toBe(testCase.expectedCoefficient)
+        expect(result.coefficient * rule.baseScore).toBe(testCase.expectedCoefficient * rule.baseScore)
       })
     }
   }

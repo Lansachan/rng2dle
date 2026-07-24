@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { matchByPattern } from '../src/game/rules/matchers/matchByPattern'
+import { matchByPattern as runMatchByPattern } from '../src/game/rules/matchers/matchByPattern'
+
+const matchByPattern = (...args: Parameters<typeof runMatchByPattern>) => runMatchByPattern(...args).coefficient
 
 describe('matchByPattern', () => {
   it('matches repeated symbols and distinguishes different symbols', () => {

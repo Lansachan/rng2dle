@@ -77,6 +77,7 @@ interface PatternParams {
   pattern: string[]
   symbolValues?: Record<string, number[]>
   allowSameWith?: Record<string, string[]>
+  groupOrder?: string[]
   multiple?: boolean
   allowOverlap?: boolean
   coefficient?: CoefficientConfig
@@ -169,6 +170,55 @@ interface PatternParams {
 - 设为 `false`：已计数的匹配区域不能与后续匹配区域共享单元格，按扫描顺序贪心选取。
 
 显式规定扫描顺序可以避免非重叠匹配结果因实现方式不同而变化。
+
+### Group 顺序
+
+`groupOrder` 控制模板中非空格 token 在匹配结果中的分组顺序，只影响前端展示，不影响匹配语义。
+
+默认情况下，group 按 token 在模板中**从上到下、从左到右首次出现**的顺序排列。省略 `groupOrder` 时采用此默认行为。
+
+```json
+{
+  "pattern": [
+    "###",
+    "#*#",
+    "###"
+  ],
+  "groupOrder": ["*", "#"]
+}
+```
+
+以上配置使 `*` 中心格在 `#` 外围格之前出现，前端可先高亮中心，再高亮外围。
+
+`groupOrder` 的校验规则：
+
+- 必须是非空字符串数组；
+- 每项必须是单个 Unicode code point；
+- 不能包含空格，不能重复；
+- 每项必须实际出现在 `pattern` 中；
+- `pattern` 中每个非空格唯一 token 必须恰好出现一次；
+- 固定数字（`0`–`9`）和符号变量都可以出现在 `groupOrder` 中；
+- 空格不参与 `groupOrder`。
+
+例如套圈模板若希望从内圈向外圈播放：
+
+```json
+{
+  "pattern": [
+    "aaaaaa",
+    "abbbba",
+    "abccba",
+    "abccba",
+    "abbbba",
+    "aaaaaa"
+  ],
+  "groupOrder": ["c", "b", "a"]
+}
+```
+
+若省略 `groupOrder`，则按 `a`、`b`、`c` 的首次出现顺序排列，即外圈、中圈、内圈。
+
+`groupOrder` 对所有候选位置采用相同的分组顺序，不影响外层匹配的排列顺序。
 
 ### 系数策略
 

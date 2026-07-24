@@ -1,5 +1,6 @@
 import { evaluateCoefficient } from '../coefficient'
-import type { Grid, PatternParams } from '../types'
+import type { ActivationGroup, Grid, PatternParams, RuleMatchResult } from '../types'
+import { fail, succeedMultiple, toIndex } from './matchResult'
 
 function symbolPair(left: string, right: string): string {
   return left < right ? `${left}\0${right}` : `${right}\0${left}`
@@ -20,8 +21,9 @@ function matchesAt(
   startColumn: number,
   params: PatternParams,
   equalityPermissions: Set<string>,
-): boolean {
+): Map<string, ActivationGroup> | null {
   const bindings = new Map<string, number>()
+  const groups = new Map<string, ActivationGroup>()
 
   for (let row = 0; row < pattern.length; row++) {
     for (let column = 0; column < pattern[row]!.length; column++) {
@@ -29,23 +31,27 @@ function matchesAt(
       const value = grid[startRow + row]![startColumn + column]!
 
       if (token === ' ') continue
+
+      if (!groups.has(token)) groups.set(token, [])
+      groups.get(token)!.push(toIndex(grid, startRow + row, startColumn + column))
+
       if (/^[0-9]$/.test(token)) {
-        if (value !== Number(token)) return false
+        if (value !== Number(token)) return null
         continue
       }
 
       const boundValue = bindings.get(token)
       if (boundValue !== undefined) {
-        if (boundValue !== value) return false
+        if (boundValue !== value) return null
         continue
       }
 
       const allowedValues = params.symbolValues?.[token]
-      if (allowedValues && !allowedValues.includes(value)) return false
+      if (allowedValues && !allowedValues.includes(value)) return null
 
       for (const [otherSymbol, otherValue] of bindings) {
         if (otherValue === value && !equalityPermissions.has(symbolPair(token, otherSymbol))) {
-          return false
+          return null
         }
       }
 
@@ -53,7 +59,7 @@ function matchesAt(
     }
   }
 
-  return true
+  return groups
 }
 
 function overlapsUsedCells(
@@ -87,20 +93,25 @@ function markUsedCells(
   }
 }
 
-export function matchByPattern(grid: Grid, params: PatternParams): number {
-  if (grid.length === 0 || grid[0]!.length === 0) return 0
+function orderedGroups(groups: Map<string, ActivationGroup>, params: PatternParams): ActivationGroup[] {
+  const order = params.groupOrder ?? Array.from(groups.keys())
+  return order.map((token) => groups.get(token)!)
+}
+
+export function matchByPattern(grid: Grid, params: PatternParams): RuleMatchResult {
+  if (grid.length === 0 || grid[0]!.length === 0) return fail()
 
   const gridWidth = grid[0]!.length
   const pattern = params.pattern.map((row) => Array.from(row))
   const patternHeight = pattern.length
   const patternWidth = pattern[0]?.length ?? 0
 
-  if (patternHeight === 0 || patternWidth === 0) return 0
-  if (patternHeight > grid.length || patternWidth > gridWidth) return 0
+  if (patternHeight === 0 || patternWidth === 0) return fail()
+  if (patternHeight > grid.length || patternWidth > gridWidth) return fail()
 
   const equalityPermissions = getEqualityPermissions(params)
   const usedCells = new Set<number>()
-  let matchCount = 0
+  const matches: ActivationGroup[][] = []
 
   for (let row = 0; row <= grid.length - patternHeight; row++) {
     for (let column = 0; column <= gridWidth - patternWidth; column++) {
@@ -112,10 +123,13 @@ export function matchByPattern(grid: Grid, params: PatternParams): number {
         continue
       }
 
-      if (!matchesAt(grid, pattern, row, column, params, equalityPermissions)) continue
+      const groups = matchesAt(grid, pattern, row, column, params, equalityPermissions)
+      if (!groups) continue
 
-      matchCount++
-      if (!params.multiple) return evaluateCoefficient(params.coefficient, matchCount)
+      matches.push(orderedGroups(groups, params))
+      if (!params.multiple) {
+        return succeedMultiple(evaluateCoefficient(params.coefficient, 1), matches)
+      }
 
       if (params.allowOverlap === false) {
         markUsedCells(usedCells, row, column, patternHeight, patternWidth, gridWidth)
@@ -123,5 +137,6 @@ export function matchByPattern(grid: Grid, params: PatternParams): number {
     }
   }
 
-  return evaluateCoefficient(params.coefficient, matchCount)
+  const coefficient = evaluateCoefficient(params.coefficient, matches.length)
+  return coefficient === 0 ? fail() : succeedMultiple(coefficient, matches)
 }

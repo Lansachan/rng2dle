@@ -21,6 +21,7 @@ const PATTERN_FIELDS = new Set([
   'pattern',
   'symbolValues',
   'allowSameWith',
+  'groupOrder',
   'multiple',
   'allowOverlap',
   'coefficient',
@@ -294,6 +295,34 @@ export function validatePatternParams(value: unknown, path = 'params'): PatternP
     fail(`${path}.allowOverlap`, 'is only valid when multiple is true')
   }
 
+  let groupOrder: string[] | undefined
+  if (params.groupOrder !== undefined) {
+    if (!Array.isArray(params.groupOrder)) fail(`${path}.groupOrder`, 'must be an array')
+    const seen = new Set<string>()
+    groupOrder = params.groupOrder.map((entry, index) => {
+      if (typeof entry !== 'string' || Array.from(entry).length !== 1) {
+        fail(`${path}.groupOrder[${index}]`, 'must be a single character')
+      }
+      if (entry === ' ') fail(`${path}.groupOrder[${index}]`, 'must not be a space')
+      if (!symbols.has(entry) && !/^[0-9]$/.test(entry)) {
+        fail(`${path}.groupOrder[${index}]`, `"${entry}" does not appear in the pattern`)
+      }
+      if (seen.has(entry)) fail(`${path}.groupOrder[${index}]`, 'duplicate entry')
+      seen.add(entry)
+      return entry
+    })
+    for (const symbol of symbols) {
+      if (!seen.has(symbol)) fail(`${path}.groupOrder`, `missing symbol "${symbol}"`)
+    }
+    for (const row of pattern) {
+      for (const token of Array.from(row)) {
+        if (/^[0-9]$/.test(token) && !seen.has(token)) {
+          fail(`${path}.groupOrder`, `missing literal digit "${token}"`)
+        }
+      }
+    }
+  }
+
   const maximumMatchCount = multiple ? (GRID_ROWS - pattern.length + 1) * (GRID_COLS - width + 1) : 1
   const coefficient = params.coefficient === undefined
     ? undefined
@@ -303,6 +332,7 @@ export function validatePatternParams(value: unknown, path = 'params'): PatternP
     pattern,
     ...(symbolValues === undefined ? {} : { symbolValues }),
     ...(allowSameWith === undefined ? {} : { allowSameWith }),
+    ...(groupOrder === undefined ? {} : { groupOrder }),
     ...(multiple === undefined ? {} : { multiple }),
     ...(allowOverlap === undefined ? {} : { allowOverlap }),
     ...(coefficient === undefined ? {} : { coefficient }),

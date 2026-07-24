@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { getMatcher } from '../src/game/rules/registry'
 
 const constantGrid = (value: number) => Array.from({ length: 6 }, () => Array(6).fill(value))
-const matcher = (key: string, grid: number[][], params: unknown = {}) => getMatcher(key)(grid, params)
+const matcher = (key: string, grid: number[][], params: unknown = {}) =>
+  getMatcher(key)(grid, params).coefficient
 
 describe('algorithmic matchers', () => {
   it('checks exact determinant zero with integer arithmetic', () => {

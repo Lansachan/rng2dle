@@ -1,0 +1,17 @@
+title: RNG²DLE
+description: 二维随机数字盘面规则系统
+author: RNG²dle
+lang: zh-CN
+
+# 不生成 Vite 构建产物
+exclude:
+  - README.md
+  - package.json
+  - node_modules
+
+# 默认布局
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"
