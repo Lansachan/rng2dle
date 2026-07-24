@@ -9,9 +9,6 @@ exclude:
   - package.json
   - node_modules
 
-# 日期格式
-date_format: "%Y-%m-%d"
-
 # 默认布局
 defaults:
   - scope:
